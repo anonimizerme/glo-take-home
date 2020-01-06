@@ -13,7 +13,7 @@ router.get('/', async (req, res, next) => {
 
 		res.render('index', { 
 			title: 'Glo',
-			teachers: teachers
+			teachers
 		});
 	}
 	catch (e) {
@@ -27,13 +27,24 @@ router.get('/:id', async (req, res, next) => {
 		let teacher = await request.get(`${config.baseUrl}/api/teachers/${req.params.id}`).type('json');
 		teacher = teacher.body;
 
-		// TODO Similar to above teacher request, make a request to the API 
-		// to retrieve this teacher's classes
+		let classes = await request.get(`${config.baseUrl}/api/classes/${req.params.id}`).type('json');
+		classes = classes.body;
+
+		// Group classes by style
+		let classesByStyle = {};
+		for (let i in classes) {
+			const style = classes[i].style.name;
+			if (classesByStyle[style] === undefined) {
+				classesByStyle[style] = [];
+			}
+
+			classesByStyle[style].push(classes[i]);
+		}
 
 		res.render('detail', { 
 			title: 'Glo',
-			teacher: teacher,
-			classes: [] // TODO Adjust this view object to include teacher's classes
+			teacher,
+			classes: classesByStyle
 		});
 	}
 	catch (e) {
